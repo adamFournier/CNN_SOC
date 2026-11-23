@@ -68,7 +68,7 @@ vivado -mode batch -source vivado/run_tests.tcl
 - `tb_dense_layer`: two short frames, signed MACs, demo-weight reference scores, backpressure and `TLAST`.
 - `tb_cnn_top`: two 28×28 frames, 10 defined output scores per frame, framing and backpressure. This is a **stream integration smoke test**, not an accuracy benchmark.
 
-The scripts and RTL have **not** been run in Vivado/XSim in this environment. Verify simulation, synthesis, static timing and FPGA resource consumption locally before treating the design as hardware-validated.
+The three RTL testbenches passed in GitHub Actions using **GHDL**. Vivado/XSim, synthesis, timing closure, resource usage, and hardware operation are still unverified.
 
 ## Exporting learned weights
 
@@ -93,3 +93,20 @@ The exporter places the weight packages in `rtl/`. It **does not** train or quan
 - Check/extend overflow and quantization behavior for the trained model.
 
 The previous full Vivado project remains preserved in `backup-before-cleanup-2026-11-23`, and `main` is unchanged until the Pull Request is merged.
+
+## PyTorch training and INT8 export
+
+The added `Untitled0.ipynb` trains the matching 1→4 Conv3x3 + ReLU + MaxPool2x2 + Dense10 model on **MNIST handwritten digits**. Its saved notebook output reports **95.53% FP32** and **95.51% simulated INT8** test accuracy. These are Python metrics, **not hardware-validated accuracy**.
+
+After running the notebook from a fresh Python kernel, its final cell generates `tiny_cnn_weights_int8.npz` with the following arrays: `conv_weights`, `conv_biases`, `dense_weights`, `dense_biases`. Download the NPZ file to your local CNN_SOC clone, then generate the synthesizable packages:
+
+```bash
+python tools/export_weights.py tiny_cnn_weights_int8.npz
+make test
+```
+
+The converter transposes PyTorch's channel-major `(10,676)` Dense flattening to the **pixel-major four-channel AXI stream** expected by the RTL. It also checks INT8/INT32 ranges.
+
+**Important scaling caveat:** The existing `cnn_conv.vhd` uses integer input `pixel >> 2` and convolution output `accumulator >> 8`; the Python notebook computes power-of-two scales from calibration data. These must be checked and, if necessary, synchronized. Integer rounding on the CPU can also differ from shifts in RTL. Exporting coefficients alone does not guarantee bit-exact results or MNIST accuracy on hardware.
+
+To test the converter without trained weights: `python tests/test_export_weights.py` (requires NumPy and GHDL).

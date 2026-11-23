@@ -8,6 +8,8 @@ on:
       - 'rtl/**'
       - 'tb/**'
       - 'Makefile'
+      - 'tools/**'
+      - 'tests/**'
       - '.github/workflows/rtl-tests.yml'
 
 jobs:
@@ -22,3 +24,7 @@ jobs:
           sudo apt-get install -y ghdl
       - name: Run VHDL-2008 testbenches
         run: make test
+      - name: Verify quantized weight exporter
+        run: |
+          python3 -m pip install numpy
+          python3 tests/test_export_weights.py
