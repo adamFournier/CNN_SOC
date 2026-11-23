@@ -1,0 +1,7 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../project_ACC_MAT.srcs/sources_1/new/conv_filter.vhd" \
+"../../../../project_ACC_MAT.srcs/sim_1/imports/Downloads/tb_conv_filter_avec_images.vhd" \
+
+# Do not sort compile order
+nosort
