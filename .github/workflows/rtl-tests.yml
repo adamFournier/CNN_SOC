@@ -1,0 +1,30 @@
+name: VHDL RTL tests
+
+on:
+  push:
+    branches: [cleanup-organized-projects]
+  pull_request:
+    paths:
+      - 'rtl/**'
+      - 'tb/**'
+      - 'Makefile'
+      - 'tools/**'
+      - 'tests/**'
+      - '.github/workflows/rtl-tests.yml'
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Install GHDL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ghdl
+      - name: Run VHDL-2008 testbenches
+        run: make test
+      - name: Verify quantized weight exporter
+        run: |
+          python3 -m pip install numpy
+          python3 tests/test_export_weights.py
