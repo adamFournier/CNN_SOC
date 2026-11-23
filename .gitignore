@@ -1,0 +1,22 @@
+# Vivado generated outputs
+.Xil/
+*.cache/
+*.gen/
+*.runs/
+*.sim/
+*.hw/
+*.ip_user_files/
+*.tmp/
+build/
+*.log
+*.jou
+*.str
+*.dcp
+*.bit
+*.bin
+*.wdb
+*.wcfg
+*.xsa
+*.pyc
+__pycache__/
+# Only handwritten RTL and source project scripts are tracked.
