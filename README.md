@@ -1,29 +1,35 @@
 # CNN Convolution Engine — VHDL / AXI4-Stream
 
-Bloc de convolution destiné à une chaîne CNN embarquée sur un SoC FPGA Zynq-7000. **Projet en cours de développement, non présenté comme un CNN complet validé.**
+A work-in-progress VHDL convolution block intended for a CNN processing pipeline on a Zynq-7000 FPGA SoC. **This repository is not presented as a complete, verified CNN.**
 
-## Sources
-- `rtl/cnn_conv.vhd` : bloc de convolution pour entrée 8 bits, image 28 × 28 par défaut et sortie AXI4-Stream 32 bits (4 activations 8 bits regroupées).
-- `rtl/conv_kernel.vhd` : convolution 3 × 3 pondérée (9 produits puis accumulation) et ajout du biais.
-- `rtl/cnn_weights_package.vhd` : définition des 4 jeux de poids et biais. **Les valeurs actuellement versionnées sont toutes nulles** : ce sont des placeholders, pas des poids entraînés.
+## Repository structure
+
+- `rtl/cnn_conv.vhd`: convolution block with a default image size of 28 × 28, 8-bit AXI4-Stream input and 32-bit AXI4-Stream output packing four 8-bit activations.
+- `rtl/conv_kernel.vhd`: weighted 3 × 3 convolution (nine multiply-accumulates and a bias term).
+- `rtl/cnn_weights_package.vhd`: constants for four 3 × 3 filters and biases. **All checked-in values are currently zero placeholders**, not trained model parameters.
+- `vivado/create_cnn_project.tcl`: script creating a standalone Vivado RTL project.
 
 ## Architecture
-Le code assemble quatre instances de `conv_kernel` pour une extraction multi-filtre. Il utilise deux line buffers et une fenêtre glissante 3 × 3, ainsi que `TVALID`, `TREADY` et `TLAST` pour les transferts AXI4-Stream. Le code contient des opérations de mise à l'échelle et d'activation, à valider avant d'annoncer une inférence complète.
 
-## Reproduction
-Depuis la racine du dépôt :
-```sh
+The convolution module instantiates four parallel `conv_kernel` units and uses two line buffers with a 3 × 3 sliding window. The source includes AXI4-Stream `TVALID`, `TREADY`, and `TLAST` handshaking, as well as scaling and activation logic. This code still requires functional verification.
+
+## Build a minimal Vivado project
+
+With AMD/Xilinx Vivado available, run from the repository root:
+
+```bash
 vivado -mode batch -source vivado/create_cnn_project.tcl
 ```
-Le script crée un projet RTL minimal et ajoute les trois sources VHDL. Il ne prétend **pas** reconstituer un SoC complet avec PS, DMA et pilote logiciel : le block design présent dans l'ancien projet Vivado portait sur `top_config_conv`, c'est-à-dire la convolution configurable, et a été conservé dans le dépôt Sobel/convolution.
 
-## Validation et limitations
-- Aucun testbench CNN autonome n'a été identifié dans l'ancien dépôt.
-- Les poids/biais sont actuellement tous à zéro.
-- Le pooling, le classifieur final et la validation end-to-end ne sont pas démontrés par les trois sources conservées.
-- Aucune simulation ou synthèse n'a été relancée lors de cette réorganisation GitHub.
+The script creates a minimal RTL project targeting `xc7z020clg484-1`. It **does not** reconstruct a complete PS/DMA SoC design, and does not run simulation or synthesis.
 
-Les tests fonctionnels, l'intégration SoC et les mesures réelles de ressources/latence restent à documenter.
+## Current limitations
 
-## Sauvegarde
-La branche `backup-before-cleanup-2026-11-23` conserve l'intégralité de l'ancien projet Vivado, y compris fichiers générés et historique. Le nettoyage distant ne modifie aucun répertoire local.
+- No standalone CNN testbench was identified in the original repository.
+- The weights and biases in the checked-in package are all zero.
+- Pooling, a classification head and complete end-to-end CNN inference are not established by the included files.
+- No new simulation, implementation or on-board measurement was carried out during repository cleanup.
+
+## Backup
+
+The original full Vivado project is preserved in `backup-before-cleanup-2026-11-23`. The original configurable-convolution SoC block design belongs to the separate Sobel/convolution repository rather than this CNN-only source package. Generated files are excluded from the working branch, without modifying local files.
