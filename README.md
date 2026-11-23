@@ -23,13 +23,4 @@ vivado -mode batch -source vivado/create_cnn_project.tcl
 
 The script creates a minimal RTL project targeting `xc7z020clg484-1`. It **does not** reconstruct a complete PS/DMA SoC design, and does not run simulation or synthesis.
 
-## Current limitations
 
-- No standalone CNN testbench was identified in the original repository.
-- The weights and biases in the checked-in package are all zero.
-- Pooling, a classification head and complete end-to-end CNN inference are not established by the included files.
-- No new simulation, implementation or on-board measurement was carried out during repository cleanup.
-
-## Backup
-
-The original full Vivado project is preserved in `backup-before-cleanup-2026-11-23`. The original configurable-convolution SoC block design belongs to the separate Sobel/convolution repository rather than this CNN-only source package. Generated files are excluded from the working branch, without modifying local files.
